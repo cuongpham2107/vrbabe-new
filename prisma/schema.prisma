@@ -1,0 +1,352 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                 String    @id @default(cuid())
+  userId             String
+  providerType       String
+  providerId         String
+  providerAccountId  String
+  refreshToken       String?
+  accessToken        String?
+  accessTokenExpires DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  user               User      @relation(fields: [userId], references: [id])
+
+  @@unique([providerId, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  expires      DateTime
+  sessionToken String   @unique
+  accessToken  String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model VerificationRequest {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, token])
+
+  @@map("verificati_on_requests")
+}
+
+model Admin {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
+  name     String
+
+  imageId String?
+  image   File?   @relation("avatar", fields: [imageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  files File[] @relation("files")
+
+  folders FolderFile[] @relation("folders")
+
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  histories AdminHistory[]
+
+  publish   String   @default("publish") // or draft
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
+model Role {
+  id   String @id @default(cuid())
+  name String
+
+  admins Admin[]
+
+  permissions PermissionsOnRoles[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("roles")
+}
+
+model Permission {
+  key       String // 'browse' | 'create' | 'edit' | 'delete' | 'file' 
+  tableName String
+
+  roles PermissionsOnRoles[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // id        String @id @default(cuid())
+  @@id([key, tableName])
+  @@map("permissions")
+}
+
+model PermissionsOnRoles {
+  roleId              String
+  permissionKey       String
+  permissionTableName String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission Permission @relation(fields: [permissionKey, permissionTableName], references: [key, tableName], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([roleId, permissionKey, permissionTableName])
+  @@map("permissions_on_roles")
+}
+
+model FolderFile {
+  id        String @id @default(cuid())
+  name      String
+  tableName String
+
+  adminId String
+  admin   Admin  @relation("folders", fields: [adminId], references: [id])
+
+  parentId String?
+  parent   FolderFile?  @relation("children", fields: [parentId], references: [id])
+  children FolderFile[] @relation("children")
+
+  files File[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("folder_files")
+}
+
+model File {
+  id            String  @id @default(cuid())
+  name          String
+  mime          String
+  caption       String?
+  url           String
+  width         Int?
+  height        Int?
+  naturalHeight Int?
+  naturalWidth  Int?
+  size          Float
+  tableName     String
+
+  adminId String
+  admin   Admin  @relation("files", fields: [adminId], references: [id])
+
+  folderFileId String?
+  folderFile   FolderFile? @relation(fields: [folderFileId], references: [id])
+
+  admins Admin[] @relation("avatar")
+
+  sceneAudios Scene[]
+  SceneImages Scene[] @relation("image")
+
+  advancedHotspots AdvancedHotspot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("files")
+}
+
+model GroupSetting {
+  id        String  @id @default(uuid())
+  name      String
+  label     String?
+  sort      Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  settings Setting[]
+
+  @@map("group_settings")
+}
+
+model Setting {
+  id        String  @id @default(uuid())
+  name      String  @unique
+  label     String?
+  type      String
+  details   String?
+  value     String? @db.Text
+  col       Int?
+  sort      Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  groupId String
+  group   GroupSetting @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("settings")
+}
+
+model AdminHistory {
+  id        Int     @id @default(autoincrement())
+  status    String  // 'succcess' | 'error'
+  action    String  // 'create' | 'edit' | 'delete' | 'upload' | 'login'
+  title     String
+  tableName String?
+  data      String? @db.Text
+
+  adminId String
+  admin Admin @relation(fields: [adminId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_histories")
+}
+
+model AccessHistory {
+  id     String  @id @default(cuid())
+  device String
+  url    String @default("/")
+  ip     String?
+
+  accessTime  DateTime @default(now())
+  timeToLeave DateTime @default(now())
+
+  @@map("access_histories")
+}
+
+model GroupScene {
+  id   String @id @default(uuid())
+  name String
+  sort Int?
+
+  scenes Scene[]
+
+  publish   String   @default("publish") // or draft
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("group_scenes")
+}
+
+model Scene {
+  id                    String  @id @default(uuid())
+  url                   String
+  slug                  String  @unique
+  name                  String
+  levels                String
+  faceSize              Int
+  initialViewParameters String
+  description           String? @db.Text
+  sort                  Int?
+
+  imageId String?
+  image   File?   @relation("image", fields: [imageId], references: [id])
+
+  audioId String?
+  audio   File?   @relation(fields: [audioId], references: [id])
+
+  groupId String?
+  group   GroupScene? @relation(fields: [groupId], references: [id])
+
+  infoHotspots InfoHotspot[]
+  linkHotspots LinkHotspot[]
+  advancedHotspots AdvancedHotspot[]
+
+  publish   String   @default("publish") // or draft
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("scenes")
+}
+
+model InfoHotspot {
+  id          String  @id @default(uuid())
+  yaw         Float
+  pitch       Float
+  direction   String?
+  title       String?
+  description String? @db.Text
+  image       String?
+  type        String?
+  video       String?
+
+  sceneId String
+  scene   Scene  @relation(fields: [sceneId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("info_hotspots")
+}
+
+model LinkHotspot {
+  id        String  @id @default(uuid())
+  yaw       Float
+  pitch     Float
+  direction String?
+  target    String
+  type      String?
+
+  sceneId String
+  scene   Scene  @relation(fields: [sceneId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("link_hotspots")
+}
+
+model AdvancedHotspot {
+  id          String  @id @default(uuid()) 
+  position    String  @db.Text
+  title       String
+  type        String?
+  description String? @db.Text
+
+  layerId String?
+  layer   File?  @relation(fields: [layerId], references: [id])
+
+  sceneId String
+  scene   Scene  @relation(fields: [sceneId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("advanced_hotspots")
+}

@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "name": "sample",
+      "script": "npm",
+      "args": "run start2"
+    }
+  ]
+}

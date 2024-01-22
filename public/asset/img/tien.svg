@@ -1,0 +1,18 @@
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" tabindex="-1" viewBox="0 0 55 69" version="1.1" class="arrow_forward_svg">
+ <title>next</title>
+ <defs>
+  <style>
+            .arrow_forward_svg polygon {
+              fill: #fff;
+            }
+            .arrow_forward_svg polygon.arrow_forward_svg_shadow {
+              fill: #000;
+              opacity: .3;
+            }
+        </style>
+ </defs>
+ <g>
+  <polygon points="0 69 55 69 38.3163163 24.7587305 54.3929498 24.7587305 27.0160853 7 0.912928158 24.7587305 15.7174229 24.7587305" class="arrow_forward_svg_shadow"/>
+  <polygon points="0 62 55 62 38.3163163 17.7587305 54.3929498 17.7587305 27.0160853 0 0.912928158 17.7587305 15.7174229 17.7587305"/>
+ </g>
+</svg>

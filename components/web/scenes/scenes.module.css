@@ -1,0 +1,53 @@
+/* viewer  */
+.viewer :global(.psv-loader-container) {
+  display: none !important;
+}
+.viewer :global(.psv-container) {
+  background: none !important;
+}
+
+.viewer :global(.psv-panel-content) {
+  @apply backdrop-blur-md;
+}
+
+.viewer :global(.psv-panel.psv--capture-event.psv-panel--open) {
+  width: 600px;
+  max-width: 100%;
+}
+
+.viewer :global(.marker-polygon) {
+  @apply !opacity-0 transition-opacity hover:!opacity-100;
+}
+
+/* leftside */
+.leftside :global(.simplebar-scrollbar::before) {
+  background-color: white;
+}
+
+/* bar options */
+.baroptions :global(.bar-icon) {
+  @apply w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-sky-700 hover:bg-sky-600 text-white 
+    flex items-center justify-center cursor-pointer pointer-events-auto select-none;
+}
+
+.baroptions :global(.bar-icon .icon) {
+  @apply !text-xl sm:!text-2xl;
+}
+
+.baroptions :global(.custom-bar::-webkit-scrollbar) {
+  width: 8px;
+  height: 8px;
+}
+
+.baroptions :global(.custom-bar::-webkit-scrollbar-thumb) {
+  background: rgba(90, 90, 90);
+}
+
+.baroptions :global(.custom-bar::-webkit-scrollbar-track) {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.baroptions :global(.pswp img) {
+  max-width: none;
+  object-fit: contain;
+}
