@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "sample",
+      "name": "vrKimThai",
       "script": "npm",
       "args": "run start2"
     }
