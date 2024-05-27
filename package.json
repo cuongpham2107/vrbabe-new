@@ -7,7 +7,7 @@
     "build": "next build",
     "seed": "node ./prisma/seed.js",
     "start": "next start",
-    "start2": "next start -p 3002",
+    "start2": "next start -p 3003",
     "start3": "NODE_ENV=production node server.js",
     "lint": "next lint"
   },

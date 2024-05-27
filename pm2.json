@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "vrKimThai",
+      "name": "vrBabe",
       "script": "npm",
       "args": "run start2"
     }
