@@ -1,3 +1,4 @@
+
 import React, { ReactNode } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { findSettingByName } from '@/lib/admin/fields';
@@ -123,9 +124,13 @@ const layout = async ({children}: {children: ReactNode}) => {
   }
 
   const {scenes, scenesNonGroup, groups} = await getData()
-
+  
   return (
+    <>
+    
     <SceneContent scenes={scenes} scenesNonGroup={scenesNonGroup} groups={groups} children={children} />
+    
+    </>
   )
 }
 

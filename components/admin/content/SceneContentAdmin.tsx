@@ -16,7 +16,7 @@ const SceneContentAdmin = ({
 }: {
   scenes: SceneDataState[]
 }) => {
-
+  
   const [openModalAdd, setOpenModalAdd] = useState(false)
 
   const [sceneId, setSceneId] = useState(scenes[0]?.id)

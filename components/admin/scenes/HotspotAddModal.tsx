@@ -37,6 +37,9 @@ const HotspotAddModal = ({
   const [video, setVideo] = useState('')
   const [description, setDescription] = useState('')
 
+  const [title_en, setTitleEn] = useState('')
+  const [description_en, setDescriptionEn] = useState('')
+
   useEffect(() => {
     if (data) {
       if (data.target) {
@@ -47,6 +50,9 @@ const HotspotAddModal = ({
       setTitle(data.title || '')
       setVideo(data.video || '')
       setDescription(data.description || '')
+
+      setTitleEn(data.title_en || '')
+      setDescriptionEn(data.description_en || '')
     }
     else {
       setTarget(null)
@@ -54,6 +60,8 @@ const HotspotAddModal = ({
       setTitle('')
       setVideo('')
       setDescription('')
+      setTitleEn('')
+      setDescriptionEn('')
     }
   }, [data])
 
@@ -84,7 +92,9 @@ const HotspotAddModal = ({
           target: target?.id,
           type,
           title,
+          title_en,
           description,
+          description_en,
           video
         }))
 
@@ -138,7 +148,13 @@ const HotspotAddModal = ({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
-                <SelectAdmin label='loại' name='type' required value={type} onChange={e => setType(e.target.value)}>
+                <InputAdmin 
+                  label='Tiêu đề(en)' 
+                  name='title_en' 
+                  value={title_en}
+                  onChange={(e) => setTitleEn(e.target.value)}
+                />
+                <SelectAdmin label='Loại' name='type' required value={type} onChange={e => setType(e.target.value)}>
                   <option value="1">Cơ bản</option>
                   <option value="2">Video</option>
                   <option value="3">Thông tin</option>
@@ -153,14 +169,24 @@ const HotspotAddModal = ({
                     value={video}
                     onChange={(e) => setVideo(e.target.value)}
                   />
-                  : <RichTextAdmin 
-                    placeholder='eg. NrkWdRHKfZE' 
-                    label='Nội dung' 
-                    name='description' 
-                    required={true} 
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
+                  : 
+                  <>
+                    <RichTextAdmin 
+                      placeholder='eg. NrkWdRHKfZE' 
+                      label='Nội dung' 
+                      name='description' 
+                      required={true} 
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                    <RichTextAdmin 
+                      placeholder='eg. NrkWdRHKfZE' 
+                      label='Nội dung(en)' 
+                      name='description_en'
+                      value={description_en}
+                      onChange={(e) => setDescriptionEn(e.target.value)}
+                    />
+                  </>
                 }
             
               </div>

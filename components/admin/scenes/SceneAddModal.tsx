@@ -56,11 +56,17 @@ const SceneAddModal = ({
   }
 
   const [name, setName] = useState('')
+  const [name_en, setName_en] = useState('')
   const [slugName, setSlugName] = useState('')
   const [image, setImage] = useState<File>()
   const [audio, setAudio] = useState<File>()
+  const [audio_en, setAudio_en] = useState<File>()
   const [group, setGroup] = useState<GroupScene | null>(null)
   const [description, setDescription] = useState<string>()
+  const [description_en, setDescriptionEn] = useState<string>()
+
+  const [latitude, setLatitude] = useState<string>()
+  const [longitude, setLongitude] = useState<string>()
   const [publish, setPublish] = useState(true)
 
   const handelChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,14 +74,18 @@ const SceneAddModal = ({
     setName(value)
     if (!scene) {
       setSlugName(slugify(value, {
-        replacement: '_',  // replace spaces with replacement character, defaults to `-`
-        remove: undefined, // remove characters that match regex, defaults to `undefined`
-        lower: true,      // convert to lower case, defaults to `false`
-        strict: false,     // strip special characters except replacement, defaults to `false`
-        locale: 'vi',      // language code of the locale to use
-        trim: true         // trim leading and trailing replacement chars, defaults to `true`
+        replacement: '_',   // replace spaces with replacement character, defaults to `-`
+        remove: undefined,  // remove characters that match regex, defaults to `undefined`
+        lower: true,        // convert to lower case, defaults to `false`
+        strict: false,      // strip special characters except replacement, defaults to `false`
+        locale: 'vi',       // language code of the locale to use
+        trim: true          // trim leading and trailing replacement chars, defaults to `true`
       }))
     }
+  }
+  const handelChangeName_en = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value
+    setName_en(value)
   }
 
   const handelChangeSlugName = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,11 +102,14 @@ const SceneAddModal = ({
   const setDefaultData = (scene: SceneDataState | null) => {
     if (scene) {
       setName(scene.name)
+      setName_en(scene.name_en || '')
       setSlugName(scene.slug)
       setImage(scene.image || undefined)
       setAudio(scene.audio || undefined)
+      setAudio_en(scene.audio_en || undefined)
       setGroup(scene.group)
       setDescription(scene.description || '')
+      setDescriptionEn(scene.description_en || '')
       setPublish(scene.publish == "publish")
     }
     else {
@@ -104,8 +117,10 @@ const SceneAddModal = ({
       setSlugName('')
       setImage(undefined)
       setAudio(undefined)
+      setAudio_en(undefined)
       setGroup(null)
       setDescription('')
+      setDescriptionEn('')
       setPublish(true)
     }
   }
@@ -128,12 +143,17 @@ const SceneAddModal = ({
 
         await useAction(() => addEditScene({
           audio: audio?.id,
+          audio_en: audio_en?.id,
           imageId: image?.id,
           name,
+          name_en,
           publish,
           slug : slugName,
+          latitude,
+          longitude,
           count,
           description,
+          description_en,
           group: group?.id,
           id: scene?.id,
         }))
@@ -160,13 +180,22 @@ const SceneAddModal = ({
         <DrawerTitle>{!scene ? 'Thêm' : 'Sửa'} điểm chụp <span className="text-blue-600">{scene?.name}</span></DrawerTitle>
         <DrawerContent className="flex flex-col gap-4 relative">
           <InputAdmin label="Tiêu đề" name="name" value={name} onChange={handelChangeName} placeholder="Vd: bán đảo Bắc Hà" required={true} />
+
+          <InputAdmin label="Tiêu đề(en)" name="name_en" value={name_en} onChange={handelChangeName_en}  />
+
           <InputAdmin label="Slug" name="slug" value={slugName} onChange={handelChangeSlugName} required={true} />
           <div className="flex gap-6">
-            <FileInputAdmin className="w-1/2" label="Ảnh" name="image" value={image} onChange={(e) => setImage(e.target.value)} details={{tableName: 'scene'}} required />
-            <FileInputAdmin className="w-1/2" label="Âm thanh" value={audio} onChange={(e) => setAudio(e.target.value)} name="audio" details={{tableName: 'scene', fileTypes: ['audio']}} />
+            <InputAdmin className="w-1/2" label="Latitude" name="latitude" value={latitude} onChange={(e) => setLatitude(e.target.value)}  />
+            <InputAdmin className="w-1/2" label="Longitude" name="longitude" value={longitude} onChange={(e) => setLongitude(e.target.value)} />
+          </div>
+          <div className="flex gap-6">
+            <FileInputAdmin className="w-1/3" label="Ảnh" name="image" value={image} onChange={(e) => setImage(e.target.value)} details={{tableName: 'scene'}} required />
+            <FileInputAdmin className="w-1/3" label="Âm thanh" value={audio} onChange={(e) => setAudio(e.target.value)} name="audio" details={{tableName: 'scene', fileTypes: ['audio']}} />
+            <FileInputAdmin className="w-1/3" label="Âm thanh(en)" value={audio_en} onChange={(e) => setAudio_en(e.target.value)} name="audio_en" details={{tableName: 'scene', fileTypes: ['audio']}} />
           </div>
           <RelationInputAdmin label="Danh mục" value={group || null} onChange={(e) => setGroup(e.target.value)} details={{tableNameRelation: 'groupScene', titleRelation: 'name', typeRelation: 'many-to-one'}} />
           <RichTextAdmin label="Nội dung" value={description} onChange={e => setDescription(e.target.value)} name="description" />
+          <RichTextAdmin label="Nội dung(en)" value={description_en} onChange={e => setDescriptionEn(e.target.value)} name="description_en" />
           <SwitchAdmin label="Xuất bản" checked={publish} onChange={(e) => setPublish(e.target.checked)} name="publish" />
         </DrawerContent>
         <DrawerAction>

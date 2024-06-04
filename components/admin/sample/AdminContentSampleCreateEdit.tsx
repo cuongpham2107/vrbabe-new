@@ -21,6 +21,7 @@ export type SampleStateType = {
 const AdminContentSampleCreateEdit: React.FC<SampleStateType> = ({
   data, name, columns, tableName, tablesName
 }) => {
+  
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)
@@ -97,7 +98,6 @@ const AdminContentSampleCreateEdit: React.FC<SampleStateType> = ({
       return v
     }))
   }
-
   return (
     <form onSubmit={save}>
       <div className="flex items-center space-x-1 text-sky-500 hover:text-sky-600 bg-transparent cursor-pointer"

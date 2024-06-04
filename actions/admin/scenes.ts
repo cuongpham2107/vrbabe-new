@@ -12,12 +12,12 @@ import db from "@/lib/admin/db";
 import { equirectangularToFisheye, renderFacePromise } from "@/lib/admin/scenes";
 
 export const addEditScene = async ({
-  name, slug, imageId, audio, group, description,
+  name,name_en ,slug, imageId, audio,audio_en, group, description,description_en, latitude, longitude,
   publish, count, id
 }: {
-  name: string, slug: string,
-  imageId?: string, audio?: string,
-  group?: string, description?: string,
+  name: string,name_en:string ,slug: string,
+  imageId?: string, audio?: string,audio_en?:string,
+  group?: string, description?: string, description_en?: string, latitude?: string, longitude?: string,
   publish: boolean, count?: number
   id?: string
 }) => {
@@ -58,6 +58,7 @@ export const addEditScene = async ({
       const dataCreate = {
         id: uuid,
         name: name,
+        name_en: name_en,
         slug: slug,
         faceSize: 8192,
         initialViewParameters: {
@@ -68,12 +69,15 @@ export const addEditScene = async ({
         url: `/storage/tiles/${uuid}`,
         levels: `[]`,
         description: description,
+        description_en:description_en,
+        latitude: latitude,
+        longitude: longitude,
         imageId: imageId,
         audioId: audio || undefined,
+        audioEnId: audio_en || undefined,
         groupId: group || undefined,
         publish: publish ? 'publish' : 'draft'
       }
-  
       await db.scene.create({
         data: {
           ...dataCreate,
@@ -107,9 +111,14 @@ export const addEditScene = async ({
 
       const dataCreate = {
         name: name,
+        name_en: name_en,
         slug: slug,
         description: description,
+        description_en:description_en,
+        latitude: latitude,
+        longitude: longitude,
         audioId: audio || undefined,
+        audioEnId: audio_en || undefined,
         groupId: group || undefined,
         publish: publish ? 'publish' : 'draft'
       }
@@ -288,11 +297,11 @@ export const sortScene = async (list: string[]) => {
 
 export const createEditHotspot = async ({
   id, sceneId, target, yaw, pitch, hotspotType, type, video,
-  title, description
+  title, title_en, description, description_en
 }: {
   id?: string, sceneId: string, target: string, yaw: string,
   pitch: string, hotspotType: string, type: string, video: string,
-  title: string, description: string
+  title: string,title_en:string, description: string, description_en:string
 }) => {
   const user = await getAdmin()
   if (!user) throw "Authorization"
@@ -358,22 +367,23 @@ export const createEditHotspot = async ({
         : checkPermissions(user.role.permissions, "infoHotspot", "create"))) {
         throw "Forbidden";
       }
-
+      
       if (id) {
         const dataCreate = {
           type: type,
           title: title,
+          title_en: title_en,
           description: description,
+          description_en: description_en,
           video: video
         }
-
         infoHotspot = await db.infoHotspot.update({
           where: {
             id
           },
           data: dataCreate
         })
-
+        
         await createHistoryAdmin({
           action: 'Cập nhập',
           title: 'Chỉnh sửa điểm nóng thông tin ' + id,
@@ -390,7 +400,9 @@ export const createEditHotspot = async ({
           pitch: +pitch,
           type: type,
           title: title,
+          title_en: title_en,
           description: description,
+          description_en: description_en,
           video: video
         }
 
@@ -427,11 +439,11 @@ export const createEditHotspot = async ({
 }
 
 export const createEditAdvancedHotspot = async ({
-  id, sceneId, type, layerId, title, position
+  id, sceneId, type, layerId, title, title_en, position
 }: {
   id?: string, sceneId: string, type: 'layer' | 'polygon',
   position: { id: string, yaw: number, pitch: number }[],
-  title: string, layerId?: string
+  title: string,title_en:string, layerId?: string
 }) => {
   const user = await getAdmin()
   if (!user) throw "Authorization"
@@ -441,6 +453,7 @@ export const createEditAdvancedHotspot = async ({
       sceneId,
       type,
       title,
+      title_en,
       layerId,
       position: JSON.stringify(position)
     }

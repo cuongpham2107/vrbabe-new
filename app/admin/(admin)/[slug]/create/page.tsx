@@ -20,7 +20,6 @@ const page = async ({
   if (!checkPermissions(admin?.role.permissions || [], table.tableName, "create")) {
     return <div>Bạn không có quyền truy cập trang này</div>
   }
-
   return (
     <AdminContentSampleCreateEdit name={table.name} tableName={table.tableName} columns={table.columns} tablesName={tablesName} />
   )

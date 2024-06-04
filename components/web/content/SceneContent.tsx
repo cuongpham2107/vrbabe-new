@@ -10,6 +10,7 @@ import { SceneProps } from "@/app/(web)/layout"
 import ScenesScreen from "../scenes/ScenesScreen"
 import { useAction } from "@/lib/utils/promise"
 import { createAccess } from "@/actions/access"
+import { t } from "i18next"
 
 const SceneContent = ({
   scenes = [], groups = [], children,
@@ -53,7 +54,7 @@ const SceneContent = ({
       { scenes.length > 0 || scenesNonGroup.length > 0
         ? <ScenesScreen />
         : <div className="fixed w-full h-screen top-0 left-0 grid place-items-center">
-          Không có bối cảnh nào
+          {t('There is no context')}
         </div>
       }
 

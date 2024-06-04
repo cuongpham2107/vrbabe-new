@@ -13,6 +13,9 @@ import { SceneProps } from "@/app/(web)/layout";
 import { useClickOutside } from "@/lib/utils/clickOutside";
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
+import { t } from "i18next";
+import i18n from "@/lib/utils/i18next";
+import { useLanguageStore } from "@/stores/web/language";
 
 // million-ignore
 const LeftSideScene = ({
@@ -20,6 +23,7 @@ const LeftSideScene = ({
 }: {
   sceneSlug?: string, currentScene?: SceneProps
 }) => {
+ 
   const router = useRouter()
   const { scenes, scenesNonGroup, showListScene, groups, start } = useScene()
   const { findSettingByName } = useSettings()
@@ -80,8 +84,9 @@ const LeftSideScene = ({
     // }
 
     // window.ResizeObserver = ResizeObserver
+   
   }, [])
-
+  const language = useLanguageStore(state => state.language)
   return (
     <div className={styles.leftside}>
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-black/10 via-transparent to-black/10 pointer-events-none"></div>
@@ -100,7 +105,7 @@ const LeftSideScene = ({
                 <div className="w-3/4 max-w-3xl border-4 border-white bg-white">
                   <Image 
                     src={showSceneDemImage} 
-                    alt="Ảnh demo điểm chụp" 
+                    alt={t('Demo photo of shooting point')}
                     width={1000}
                     height={1000}
                     className="w-full h-full aspect-[5/3] object-cover" 
@@ -168,13 +173,17 @@ const LeftSideScene = ({
                                 onClick={() => clickSceneTitle(v.slug)}
                                 onMouseEnter={() => enterSceneTitle(v, 'scene')}
                               >
-                                <span className="flex-grow" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{v.name}</span>
+                                {language === 'vn' ? 
+                                  <span className="flex-grow" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{v.name}</span>
+                                :
+                                  <span className="flex-grow" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{ v.name_en ? v.name_en : v.name}</span>
+                                }
                                 <span className="flex-none icon">
                                   chevron_right
                                 </span>
                               </div>
                             )
-                            : <div className="py-0.5 md:py-2">Không có bối cảnh nào</div>
+                            : <div className="py-0.5 md:py-2">{t('There is no context')}</div>
                           }
                           { scenesNonGroup.map(v =>
                             <div key={`${v.id}-scene`} className="flex py-1 space-x-2 items-center cursor-pointer group transition-all duration-[0.4s] origin-left hover:scale-[1.1] pointer-events-auto"
@@ -182,7 +191,11 @@ const LeftSideScene = ({
                               onClick={() => clickSceneTitle(v.slug)}
                             >
                               <div className={`w-1 h-7 md:h-9 bg-white group-hover:bg-sky-600 ${currentScene?.groupId == v.id ? '!bg-sky-600' : ''}`}></div>
-                              <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{v.name}</span>
+                              {language === 'vn' ? 
+                                <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{v.name}</span>
+                              :
+                                <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{ v.name_en ? v.name_en : v.name}</span>
+                              }
                             </div>
                           )}
                         </div>
@@ -204,7 +217,12 @@ const LeftSideScene = ({
                             onClick={() => clickGroupScene(v)}
                           >
                             <div className={`w-1 h-7 md:h-9 bg-white group-hover:bg-sky-600 ${currentScene?.groupId == v.id ? '!bg-sky-600' : ''}`}></div>
-                            <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{v.name}</span>
+                            {language === 'vn' ? 
+                             <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{ v.name}</span>
+                             : 
+                             <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{ v.name_en ? v.name_en : v.name}</span>
+                             }
+                           
                           </div>
                         )}
                         { scenesNonGroup.map((v,i) =>
@@ -213,7 +231,11 @@ const LeftSideScene = ({
                             onClick={() => clickSceneTitle(v.slug)}
                           >
                             <div className={`w-1 h-7 md:h-9 bg-white group-hover:bg-sky-600 ${currentScene?.groupId == v.id ? '!bg-sky-600' : ''}`}></div>
-                            <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{v.name}</span>
+                            {language === 'vn' ?
+                              <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{v.name}</span>
+                            :
+                              <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{ v.name_en ? v.name_en : v.name}</span>
+                            }
                           </div>
                         )}
                       </div>

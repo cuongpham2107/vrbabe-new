@@ -17,6 +17,10 @@ import Loading from "@/components/ui/Loading";
 //@ts-ignore
 // import PhotoSwipeLightbox from 'photoswipe/lightbox';
 // import 'photoswipe/style.css';
+import "/node_modules/flag-icons/css/flag-icons.min.css";
+import i18n from "@/lib/utils/i18next";
+import { useTranslation } from "react-i18next";
+import { useLanguageStore } from "@/stores/web/language";
 
 const DynamicShareModal = dynamic(() => import('../ShareModal'), {
   loading: () => <Loading />
@@ -245,17 +249,33 @@ const BarOptionsScene = memo(({
     }
   }, [])
 
+
+  //language
+  const [language, setLanguage] = useState('vn')
+  const { t } = useTranslation()
+  const setStoreLanguage = useLanguageStore(state => state.setLanguage)
+  const switchLanguage = () => {
+    if (language == 'vn') {
+      setLanguage('en')
+      i18n.changeLanguage('en')
+      setStoreLanguage('en')
+    } else {
+      setLanguage('vn')
+      i18n.changeLanguage('vn')
+      setStoreLanguage('vn')
+    }
+  }
   return (
     <div className={styles.baroptions}>
       <audio src={findSettingByName("main audio")?.url} ref={mainAudio} className="sr-only" loop></audio>
       <audio ref={sceneAudio} onEnded={(e) => setSceneAudioCheck(false)} className="sr-only"></audio>
 
-      <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
+      {/* <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
         <div className="flex flex-col justify-center items-center space-y-2">
           { nextScene
             ? <>
               { nextGroup
-                ? <Tooltip title="Điểm đến tiếp" placement="top">
+                ? <Tooltip title={t('Next destination')} placement="top">
                   <Link href={`/${nextScene.slug}`} className="px-4 py-2 rounded-full shadow flex items-center
                     bg-gradient-to-t from-gray-400 via-gray-200 to-gray-100 text-sm font-semibold"
                   >
@@ -265,7 +285,7 @@ const BarOptionsScene = memo(({
                     </span>
                   </Link>
                 </Tooltip>
-              : <Tooltip title="Điểm đến tiếp" placement="top">
+              : <Tooltip title={t('Next destination')} placement="top">
                   <Link href={`/${nextScene.slug}`} className="block">
                     <Image src="/asset/img/tien.svg" alt="icon tien" width={32} height={32} className="w-8 h-8" />
                   </Link>
@@ -276,7 +296,7 @@ const BarOptionsScene = memo(({
           }
 
           { prevScene
-            ? <Tooltip title="Điểm đến trước" placement="bottom">
+            ? <Tooltip title={t('Destination first')} placement="bottom">
               <Link href={`/${prevScene.slug}`} className="block">
                   <Image src="/asset/img/lui.svg" alt="icon tien" width={32} height={32} className="w-8 h-8" />
                 </Link>
@@ -284,15 +304,20 @@ const BarOptionsScene = memo(({
             : null
           }
         </div>
-      </div>
+      </div> */}
 
       { nextScene
         ? <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-10">
           <Link href={`/${nextScene.slug}`} className="w-36 md:w-40 p-2 pr-0.5 rounded-l-lg bg-black/40 text-white 
             flex space-x-2 items-center text-xs md:text-sm">
             <div className="flex-grow min-w-0 flex flex-col items-center justify-center text-center space-y-1">
-              <p>Điểm đến tiếp:</p>
-              <p className="font-semibold line-clamp-3">{nextScene.name}</p>
+              <p>{t('Next destination')}:</p>
+              {language === "vn" ?
+                <p className="font-semibold line-clamp-3">{nextScene.name}</p>
+              :
+                <p className="font-semibold line-clamp-3">{nextScene.name_en ? nextScene.name_en : nextScene.name}</p>
+              }
+              
             </div>
             <div className="flex-none w-8 h-8 md:w-10 md:h-10 rounded-full bg-black/70 text-white flex items-center justify-center">
               <span className="icon text-2xl md:!text-3xl">
@@ -314,10 +339,18 @@ const BarOptionsScene = memo(({
               transition={{duration: .3}}
               className="absolute w-screen right-0 bottom-0 sm:right-4 sm:bottom-16 sm:w-80 max-h-[24rem] z-10 rounded bg-gray-50 shadow-sm flex flex-col items-center pointer-events-auto text-white"
             >
-              <div className="w-full flex-grow min-h-0 py-4 px-4 overflow-y-auto whitespace-pre-wrap custom-bar text-[#222]"
-                dangerouslySetInnerHTML={{__html: currentScene?.description || "Chưa có mô tả"}}
-              >
-              </div>
+              {language === "vn" ?
+                 <div className="w-full flex-grow min-h-0 py-4 px-4 overflow-y-auto whitespace-pre-wrap custom-bar text-[#222]"
+                 dangerouslySetInnerHTML={{__html: currentScene?.description || t('No description yet') }}
+                >
+                </div>
+              :
+                  <div className="w-full flex-grow min-h-0 py-4 px-4 overflow-y-auto whitespace-pre-wrap custom-bar text-[#222]"
+                  dangerouslySetInnerHTML={{__html: currentScene?.description_en || t('No description yet') }}
+                >
+                </div>
+              }
+             
 
               <div className="w-full p-2 flex items-center justify-center cursor-pointer text-black bg-gray-100 border-t hover:bg-gray-200 rounded-b"
                 onClick={() => setShowDescription(false)}
@@ -332,7 +365,7 @@ const BarOptionsScene = memo(({
         </AnimatePresence>
 
         <div className="flex space-x-4 items-end">
-          <Tooltip title={showListScene ? 'Ẩn menu' : 'Hiện menu'} placement="top-end">
+          <Tooltip title={showListScene ? t('off_menu') : t('on_menu')} placement="top-end">
             <div className="bar-icon"
               onClick={() => setShowListScene()}
             >
@@ -341,18 +374,28 @@ const BarOptionsScene = memo(({
               </span>
             </div>
           </Tooltip>
-          <Tooltip title="Chia sẻ" placement="top">
+          <Tooltip title={t('share')} placement="top">
             <div className="bar-icon"
               onClick={() => setOpenShare(true)}
             >
               <span className="icon">share</span>
             </div>
           </Tooltip>
-
+          {/* language */}
+          <Tooltip title="Language" placement="top">
+            <div className="bar-icon">
+              {language == 'vn' 
+              ?
+                <span onClick={() => switchLanguage()} className="fi fi-vn"></span> 
+              :
+                <span onClick={() => switchLanguage()} className="fi fi-sh"></span>
+              }
+            </div>
+          </Tooltip>
           <div className="!ml-auto"></div>
 
           <div className="relative w-20 h-20 sm:w-32 sm:h-32 select-none pointer-events-auto">
-            <Tooltip title={sceneAudioCheck ? 'Tắt giọng đọc': 'Mở giọng đọc'} placement="top" className="block">
+            <Tooltip title={sceneAudioCheck ? t('close_reading_voice'): t('open_reading_voice')} placement="top" className="block">
               <button className="w-full h-full rounded-full"
                 onClick={() => toggleSceneAudio()}
               >
@@ -360,13 +403,13 @@ const BarOptionsScene = memo(({
                   src={`/asset/img/${sceneAudioCheck ? 'voice_on.png' : 'voice_off.png'}`}
                   width={128}
                   height={128}
-                  alt="ảnh bật tắt âm thanh"
+                  alt={t('photo_turns_on_and_off_the_sound')}
                   className="w-full h-full"
                 />
               </button>
             </Tooltip>
 
-            <Tooltip title='Xem mô tả' placement="top" className="bar-icon absolute top-0 left-0 border-2 border-white"
+            <Tooltip title={t('see_description')} placement="top" className="bar-icon absolute top-0 left-0 border-2 border-white"
               onClick={() => setShowDescription(state => !state)}
             >
               <span className="icon">
@@ -378,7 +421,7 @@ const BarOptionsScene = memo(({
           <div className="flex flex-col space-y-2 select-none">
             <div id="gallery" className={`flex flex-col space-y-2 opacity-0 invisible translate-y-11 transition-all 
               ${showMoreOptions ? '!opacity-100 !visible !translate-y-0' : ''}`}>
-              <Tooltip title="Xem bản đồ" placement="left">
+              <Tooltip title={t('View the map')} placement="left">
                 <div className="bar-icon"
                   onClick={() => useScene.setState({googleMap: true})}
                 >
@@ -388,7 +431,7 @@ const BarOptionsScene = memo(({
                 </div>
               </Tooltip>
 
-              <Tooltip title="Chụp ảnh" placement="left">
+              <Tooltip title={t('capture')} placement="left">
                 <div className="bar-icon"
                   onClick={() => screenShot()}
                 >
@@ -398,7 +441,7 @@ const BarOptionsScene = memo(({
                 </div>
               </Tooltip>
 
-              <Tooltip title={mainAudioCheck ? 'Tắt nhạc nền' : 'Bật nhạc nền'} placement="left">
+              <Tooltip title={mainAudioCheck ? t('turn_off_background_music') : t('turn_on_background_music')} placement="left">
                 <div className="bar-icon"
                   onClick={() => toggleMainAudio()}
                 >
@@ -408,7 +451,7 @@ const BarOptionsScene = memo(({
                 </div>
               </Tooltip>
 
-              <Tooltip title={autoRotateCheck ? 'Tắt tự động xoay' : 'Bật tự động xoay'} placement="left">
+              <Tooltip title={autoRotateCheck ? t('turn_off_auto_rotation') : t('turn_on_auto_rotation') } placement="left">
                 <div className="bar-icon"
                   onClick={() => toggleAutoRotate()}
                 >
@@ -418,7 +461,7 @@ const BarOptionsScene = memo(({
                 </div>
               </Tooltip>
 
-              <Tooltip title={fullScreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'} placement="left">
+              <Tooltip title={fullScreen ? t('exit_full_screen') : t('full_screen')} placement="left">
                 <div className="bar-icon"
                   onClick={() => toggleFullScreen()}
                 >
@@ -429,7 +472,7 @@ const BarOptionsScene = memo(({
               </Tooltip>
             </div>
 
-            <Tooltip title={showMoreOptions ? 'Thu gọn' : 'Mở rộng'} placement={showMoreOptions ? "left" : 'top-end'}>
+            <Tooltip title={showMoreOptions ? t('collapse') : t('expand')} placement={showMoreOptions ? "left" : 'top-end'}>
               <div className="bar-icon"
                 onClick={() => setShowMoreOptions(state => !state)}
               >
@@ -443,6 +486,7 @@ const BarOptionsScene = memo(({
       </div>
       
       <DynamicShareModal open={openShare} setOpen={setOpenShare} />
+    
     </div>
   )
 })

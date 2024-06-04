@@ -177,7 +177,8 @@ model File {
 
   admins Admin[] @relation("avatar")
 
-  sceneAudios Scene[]
+  sceneAudios   Scene[] @relation("Audio")
+  sceneAudiosEn Scene[] @relation("AudioEn")
   SceneImages Scene[] @relation("image")
 
   advancedHotspots AdvancedHotspot[]
@@ -253,6 +254,7 @@ model AccessHistory {
 model GroupScene {
   id   String @id @default(uuid())
   name String
+  name_en String?
   sort Int?
 
   scenes Scene[]
@@ -269,18 +271,23 @@ model Scene {
   url                   String
   slug                  String  @unique
   name                  String
+  name_en               String?
+  latitude              String?
+  longitude             String?
   levels                String
   faceSize              Int
   initialViewParameters String
   description           String? @db.Text
+  description_en        String? @db.Text
   sort                  Int?
 
   imageId String?
   image   File?   @relation("image", fields: [imageId], references: [id])
 
-  audioId String?
-  audio   File?   @relation(fields: [audioId], references: [id])
-
+  audioId   String?
+  audio     File?     @relation("Audio",fields: [audioId], references: [id])
+  audioEnId String?
+  audio_en  File?   @relation("AudioEn",fields: [audioEnId], references: [id])  // Thêm dòng này
   groupId String?
   group   GroupScene? @relation(fields: [groupId], references: [id])
 
@@ -301,7 +308,9 @@ model InfoHotspot {
   pitch       Float
   direction   String?
   title       String?
+  title_en    String?
   description String? @db.Text
+  description_en String? @db.Text
   image       String?
   type        String?
   video       String?
@@ -336,6 +345,7 @@ model AdvancedHotspot {
   id          String  @id @default(uuid()) 
   position    String  @db.Text
   title       String
+  title_en    String?
   type        String?
   description String? @db.Text
 

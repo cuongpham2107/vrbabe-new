@@ -28,6 +28,8 @@ import "./tinymce.css";
 import { SceneProps } from "@/app/(web)/layout"
 import { AdvancedHotspotType } from "@/app/admin/(admin)/scenes/page"
 import GoogleMap from "./GoogleMap"
+import { useTranslation } from "react-i18next"
+import i18n from "@/lib/utils/i18next"
 
 const ScenesScreen = () => {
   const router = useRouter()
@@ -72,7 +74,7 @@ const ScenesScreen = () => {
   const findSceneDataById = (id: string) => [...scenes, ...scenesNonGroup].find(v => v.id == id)
 
   async function switchScene(scene: SceneProps) {
-    toggleAutoRotate(false)
+    // toggleAutoRotate(false)
 
     await new Promise(res => {
       markersPlugin.current?.clearMarkers()
@@ -104,9 +106,9 @@ const ScenesScreen = () => {
       createInfoHotspotElements(scene.infoHotspots)
       createAdvancedHotspotElements(scene.advancedHotspots)
 
-      if (autoRotateCheck) {
-        toggleAutoRotate(true)
-      }
+      // if (autoRotateCheck) {
+      //   toggleAutoRotate(true)
+      // }
     })
   }
  
@@ -141,7 +143,8 @@ const ScenesScreen = () => {
           logo: logo?.url
         }))
       }
-
+     
+    
       markersPlugin.current?.addMarker({
         id: hotspot.id,
         position: { yaw: hotspot.yaw, pitch: hotspot.pitch },
@@ -166,7 +169,6 @@ const ScenesScreen = () => {
         image = undefined,
         content = undefined,
         width = 40, height = 40
-
       if (hotspot?.type == "2") {
         tooltip = hotspot.title ?? ''
         html = renderToString(InfoHotSpot2())
@@ -181,7 +183,8 @@ const ScenesScreen = () => {
         content = hotspot.description ?? ''
         html = renderToString(InfoHotSpot())
       }
-
+      
+      
       markersPlugin.current?.addMarker({
         id: hotspot.id,
         position: { yaw: hotspot.yaw, pitch: hotspot.pitch },
@@ -202,11 +205,12 @@ const ScenesScreen = () => {
 
   function createAdvancedHotspotElements(hotspots: AdvancedHotspotType[]) {
     hotspots.forEach(hotspot => {
+      
       if (hotspot.type == "layer") {
         if (!hotspot.layer) return
 
         const file = hotspot.layer
-
+        
         markersPlugin.current?.addMarker({
           id: hotspot.id,
           [file.mime.startsWith('image/') ? 'imageLayer' : 'videoLayer']: file.url,
@@ -217,6 +221,7 @@ const ScenesScreen = () => {
         })
       }
       else {
+       
         markersPlugin.current?.addMarker({
           id: hotspot.id,
           className: 'marker-polygon',
@@ -231,6 +236,7 @@ const ScenesScreen = () => {
             content: hotspot.title
           },
         })
+        
       }
     })
   }
@@ -239,6 +245,7 @@ const ScenesScreen = () => {
   const [autoRotateCheck, setAutoRotateCheck] = useState(false)
 
   function toggleAutoRotate(value?: boolean) {
+    
     if (value != undefined) {
       value ? autoRotate.current?.start() : autoRotate.current?.stop()
       setAutoRotateCheck(value)
@@ -247,7 +254,7 @@ const ScenesScreen = () => {
       });
       return
     }
-
+  
     if (autoRotateCheck) {
       autoRotate.current?.stop()
       autoRotate.current?.setOptions({
@@ -263,7 +270,7 @@ const ScenesScreen = () => {
       setAutoRotateCheck(true)
     }
   }
-
+ 
   // stop auto rotate in video show
   useEffect(() => {
     changeVideoShow(videoShow)
@@ -282,7 +289,7 @@ const ScenesScreen = () => {
     }
   }
 
-  // intro and default animated values
+  // giới thiệu và các giá trị hoạt hình mặc định
 
   const animatedValues = useRef({
     pitch: { start: -Math.PI / 2, end: currentScene?.initialViewParameters?.pitch || 0.2 },
@@ -312,7 +319,7 @@ const ScenesScreen = () => {
       autoRotate.current?.setOptions({
         autorotatePitch: currentScene?.initialViewParameters.pitch,
         autostartDelay: 1000,
-        autostartOnIdle: true,
+        autostartOnIdle: false,
       });
       autoRotate.current?.start();
 
@@ -323,6 +330,7 @@ const ScenesScreen = () => {
   useEffect(() => {
     if (start) {
       intro()
+     
     }
   }, [start])
 
@@ -338,7 +346,9 @@ const ScenesScreen = () => {
           autostartDelay: null,
           autostartOnIdle: false,
           autorotatePitch: currentScene?.initialViewParameters?.pitch,
-          autorotateSpeed: '0.2rpm',
+          autorotateSpeed:  '0.1rpm',
+          
+          
         }],
         MarkersPlugin
       ],
@@ -386,6 +396,8 @@ const ScenesScreen = () => {
     }
   }, [])
 
+
+
   return (
     <>
       <div id="viewer" ref={viewerHTML}  className={`w-full h-screen ${styles.viewer}`} />
@@ -393,7 +405,7 @@ const ScenesScreen = () => {
       <LeftSideScene sceneSlug={sceneSlug} currentScene={currentScene} />
       <BarOptionsScene autoRotateCheck={autoRotateCheck} toggleAutoRotate={toggleAutoRotate} currentScene={currentScene} />
       <VideoShowScene />
-      <GoogleMap />
+      <GoogleMap scenes={scenes}/>
     </>
   )
 }

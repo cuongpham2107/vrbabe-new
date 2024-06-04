@@ -30,6 +30,7 @@ export type SceneDataState =  (Omit<Scene, 'levels' | 'initialViewParameters'> &
   advancedHotspots: AdvancedHotspotType[]
   image: File | null,
   audio: File | null,
+  audio_en: File | null,
   group: GroupScene | null
 })
 
@@ -45,6 +46,7 @@ const getData = async () => {
       },
       image: true,
       audio: true,
+      audio_en: true,
       group: true
     },
     orderBy: {

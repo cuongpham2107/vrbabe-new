@@ -23,12 +23,14 @@ const HotspotAdvancedModal = ({ sceneId }: { sceneId: string }) => {
   } = useAdminScene()
 
   const [title, setTitle] = useState('')
+  const [title_en, setTitleEn] = useState('')
   const [layer, setLayer] = useState<File | null>(null)
 
   // update data edit
   useEffect(() => {
     if (!advancedHotSpotEdit) return
     setTitle(advancedHotSpotEdit.title)
+    setTitleEn(advancedHotSpotEdit.title_en || '')
     setLayer(advancedHotSpotEdit.layer)
   }, [advancedHotSpotEdit])
 
@@ -36,6 +38,7 @@ const HotspotAdvancedModal = ({ sceneId }: { sceneId: string }) => {
   useEffect(() => {
     if (!isAdvancedHotspotModal) {
       setTitle('')
+      setTitleEn('')
       setLayer(null)
     }
   }, [isAdvancedHotspotModal])
@@ -53,6 +56,7 @@ const HotspotAdvancedModal = ({ sceneId }: { sceneId: string }) => {
         await useAction(() => createEditAdvancedHotspot({
           id: advancedHotSpotEdit?.id,
           title,
+          title_en,
           layerId: layer?.id,
           sceneId: sceneId || '',
           type,
@@ -126,6 +130,7 @@ const HotspotAdvancedModal = ({ sceneId }: { sceneId: string }) => {
                   <option value="polygon">Polygon (Đường bao)</option>
                 </SelectAdmin>
                 <InputAdmin label="Tiêu đề" value={title} onChange={e => setTitle(e.target.value)} required />
+                <InputAdmin label="Tiêu đề(en)" value={title_en} onChange={e => setTitleEn(e.target.value)}/>
                 {/* <RichTextAdmin label="Mô tả" /> */}
                 { type == "layer"
                   ? <FileInputAdmin label="Ảnh hoặc video"

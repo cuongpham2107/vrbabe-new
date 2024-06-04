@@ -1,9 +1,10 @@
 "use client"
 import { usePathname } from 'next/navigation'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, use } from 'react'
 import ClientOnly from '../CLientOnly'
 import { usePromise } from '@/lib/utils/promise'
 import { Modal, ModalAction, ModalContent, ModalTitle } from '../ui/Modal'
+import { useTranslation } from 'react-i18next'
 
 const ShareModal = ({
   open, setOpen
@@ -92,11 +93,11 @@ const ShareModalClient = ({
     //   urlShare: 'https://www.facebook.com/sharer/sharer.php?u=url'
     // }
   ]
-
+  const {t} = useTranslation()
   const copy = async () => {
     if (typeof window === "undefined" ) return
     await usePromise({
-      successTitle: 'Đã sao chép',
+      successTitle: t('Copied'),
       callback: async () => {
         navigator.clipboard.writeText(href)
       }
@@ -118,7 +119,7 @@ const ShareModalClient = ({
       onClose={handleClose}
       className='max-w-[480px]'
     >
-      <ModalTitle>Chia sẻ</ModalTitle>
+      <ModalTitle>{t('share')}</ModalTitle>
       <ModalContent className='p-6'>
         <div className="text-center grid gap-4 -mx-4" style={{gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))'}}>
           { list.map((v,i) =>
@@ -138,7 +139,7 @@ const ShareModalClient = ({
         </div>
       </ModalContent>
       <ModalAction className='flex-col items-start'>
-        <div className="font-medium">Trang liên kết</div>
+        <div className="font-medium">{t('Link page')}</div>
         <div className="w-full mt-2 rounded bg-gray-100 pl-4 pr-2 py-1 flex space-x-4">
           <input type="text" disabled className='flex-grow min-w-0 text-gray-600 border-none bg-transparent' value={href} />
           <span className="icon cursor-pointer"

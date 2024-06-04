@@ -15,6 +15,7 @@ const page = async ({
   }
 
   return <LoginContentAdmin />
+  
 }
 
 export default page
