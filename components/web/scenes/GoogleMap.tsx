@@ -29,7 +29,7 @@ const GoogleMap = ({ scenes }: { scenes: SceneProps[] }) => {
 
   const mapboxToken = "pk.eyJ1IjoiY3VvbmdwaGFtMjEwNyIsImEiOiJjbHM3bTFwb2ExNXYwMmhucmJ4OTA1a3N3In0.oRhDjYMlKHnlSwqvWQ-Qcw";
   const [selectedMarker, setSelectedMarker] = useState<{ airport: any, index: number } | null>(null);
-  const mapRef = useRef(null);
+  const mapRef = useRef<any>(null);
 
   const zoomToSelectedLoc = (e: React.MouseEvent<HTMLButtonElement>, airport: any, index: number) => {
     // stop event bubble-up which triggers unnecessary events

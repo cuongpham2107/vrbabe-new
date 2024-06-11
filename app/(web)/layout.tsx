@@ -88,7 +88,8 @@ const getData = async () => {
       advancedHotspots: v.advancedHotspots.map(v2 => ({
         ...v2,
         position: JSON.parse(v2.position) as {yaw: number, pitch: number}[]
-      }))
+      })),
+      audio_en: null // Add the missing audio_en property
     }
   })
 
