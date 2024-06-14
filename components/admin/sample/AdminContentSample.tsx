@@ -46,12 +46,12 @@ const AdminContentSample: React.FC<SampleStateType> = ({
   const orderBy = searchParams?.get('order_by') || ORDER_BY
   const orderType = searchParams?.get('order_type') || ORDER_TYPE
 
-
+  
   const handleChangePage = (page: number) => {
     let query = new URLSearchParams(searchParams?.toString())
 
-    query.set('page', (page + 1).toString())
-        
+    // query.set('page', (page + 1).toString())
+    query.set('page', (page).toString())
     router.push(`?${query.toString()}`)
   }
 
