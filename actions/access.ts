@@ -31,3 +31,17 @@ export const createAccess = async () => {
     return { error: (typeof error === "string" && error != "") ? error : 'Có lỗi xảy ra vui lòng thử lại sau' }
   }
 }
+
+export const getCatergory = async (id:string) => {
+  try {
+    const data = await db.groupScene.findUnique({
+      where: {
+        id: id
+      }
+    })
+    return data
+  } catch (error) {
+    console.log(error)
+    return { error: (typeof error === "string" && error != "") ? error : 'Có lỗi xảy ra vui lòng thử lại sau' }
+  }
+}

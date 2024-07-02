@@ -19,7 +19,6 @@ export const TABLES_SAMPLE: TableType[] = [
     rowsPerPages: [10, 20, 50],
     columns: [
       { name: 'id', label: 'ID', type: 'string', show: true},
-    
       { name: 'name', label: 'Tên', type: 'string', show: true, required: true},
       { name: 'email', label: 'Email', type: 'string', show: true, required: true},
       { name: 'image', label: 'Ảnh', type: 'file', show: true, details: { multiple: false, onlyTable: true }},
@@ -89,8 +88,12 @@ export const TABLES_SAMPLE: TableType[] = [
     
       { name: 'name', label: 'Tên(vi)', type: 'string', show: true, required: true},
       { name: 'name_en', label: 'Name(en)', type: 'string', show: true, required: true},
+      { name: 'parent', label: 'Danh mục cha', type: 'relation', show: true, details: {
+        typeRelation: 'many-to-one',
+        tableNameRelation: 'groupScene',
+        titleRelation: 'name'
+      }},
       { name: 'sort', label: 'Thứ tự', type: 'int', show: true},
-    
       { name: 'createdAt', label: 'Ngày tạo', type: 'date', show: true},
       { name: 'updatedAt', label: 'Ngày cập nhập', type: 'date', show: true},
       { name: 'publish', label: 'Xuất bản', type: 'publish', show: true},

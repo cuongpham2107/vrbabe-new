@@ -16,6 +16,7 @@ import 'simplebar-react/dist/simplebar.min.css';
 import { t } from "i18next";
 import i18n from "@/lib/utils/i18next";
 import { useLanguageStore } from "@/stores/web/language";
+import { getCatergory } from "@/actions/access";
 
 // million-ignore
 const LeftSideScene = ({
@@ -23,9 +24,10 @@ const LeftSideScene = ({
 }: {
   sceneSlug?: string, currentScene?: SceneProps
 }) => {
- 
+
   const router = useRouter()
   const { scenes, scenesNonGroup, showListScene, groups, start } = useScene()
+
   const { findSettingByName } = useSettings()
 
   let listScene = useRef(null)
@@ -78,37 +80,102 @@ const LeftSideScene = ({
 
   useClickOutside(ref, () => setShowGroupScene(false))
 
-  useEffect(() => {
-    // if (listScene.current) {
-    //   new SimpleBar(listScene.current)
-    // }
+  const [groupedData, setGroupedData] = useState<any []>([]);
 
-    // window.ResizeObserver = ResizeObserver
-   
-  }, [])
+  useEffect(() => {
+    const fetchData = async () => {
+      const updatedGroupedData: any[] = [];
+
+      for (const item of groups) {
+        const parentId = item.parent_id;
+
+        if (parentId === null) {
+          updatedGroupedData.push({
+            id: item.id,
+            name: item.name,
+            name_en: item.name_en,
+            sort: item.sort,
+            publish: item.publish,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+          });
+        } else {
+          const parentIndex = updatedGroupedData.findIndex(group => group.id === parentId);
+
+          if (parentIndex !== -1) {
+            updatedGroupedData[parentIndex].children.push({
+              id: item.id,
+              name: item.name,
+              name_en: item.name_en,
+              sort: item.sort,
+              publish: item.publish,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+            });
+          } else {
+            const parent = await getCatergory(parentId) as GroupScene;
+
+            if (parent) {
+              updatedGroupedData.push({
+                id: parent.id,
+                name: parent.name,
+                name_en: parent.name_en,
+                sort: parent.sort,
+                publish: parent.publish,
+                createdAt: parent.createdAt,
+                updatedAt: parent.updatedAt,
+                children: [{
+                  id: item.id,
+                  name: item.name,
+                  name_en: item.name_en,
+                  sort: item.sort,
+                  publish: item.publish,
+                  createdAt: item.createdAt,
+                  updatedAt: item.updatedAt,
+                }],
+              });
+            }
+          }
+        }
+      }
+
+      setGroupedData(updatedGroupedData);
+    };
+
+    fetchData();
+  }, [groups]);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+
+  const toggleExpand = (groupId: string) => {
+    if (expandedGroups.includes(groupId)) {
+      setExpandedGroups(expandedGroups.filter(id => id !== groupId));
+    } else {
+      setExpandedGroups([...expandedGroups, groupId]);
+    }
+  };
   const language = useLanguageStore(state => state.language)
   return (
     <div className={styles.leftside}>
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-black/10 via-transparent to-black/10 pointer-events-none"></div>
 
       <AnimatePresence>
-        { showSceneDemo || showGroupScene
-          ? <motion.div 
+        {showSceneDemo || showGroupScene
+          ? <motion.div
             className="absolute top-0 left-0 w-full h-full bg-gradient-to-r 
             from-black/60 via-transparent to-black/60 pointer-events-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            { showSceneDemo
+            {showSceneDemo
               ? <div className="hidden w-full h-full md:flex items-center justify-center relative z-50">
                 <div className="w-3/4 max-w-3xl border-4 border-white bg-white">
-                  <Image 
-                    src={showSceneDemImage} 
+                  <Image
+                    src={showSceneDemImage}
                     alt={t('Demo photo of shooting point')}
                     width={1000}
                     height={1000}
-                    className="w-full h-full aspect-[5/3] object-cover" 
+                    className="w-full h-full aspect-[5/3] object-cover"
                   />
                 </div>
               </div>
@@ -122,127 +189,169 @@ const LeftSideScene = ({
       <div className="absolute top-0 left-0 w-full h-full p-6 pb-20 pointer-events-none overflow-hidden select-none flex flex-col z-10">
         <div className="flex-none md:pl-6 lg:pl-12 mb-12">
           <AnimatePresence>
-            { start && showListScene
-              ? <motion.div 
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0, opacity: 0 }}
-                  className="block w-20 h-20 md:w-32 md:h-32 pointer-events-auto"
-                  // style={{boxShadow: 'rgba(0, 0, 0, 0.24) 0px 3px 8px'}}
-                >
-                  <Link href="/">
-                    <Image
-                      src={findSettingByName('site logo')?.url || '/logo.png'}
-                      width={100}
-                      height={100}
-                      alt="logo Bắc Hà"
-                      className="w-full h-full object-cover"
-                    />
-                  </Link>
-                </motion.div>
-                : null
-              }
+            {start && showListScene
+              ? <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                className="block w-20 h-20 md:w-32 md:h-32 pointer-events-auto"
+              // style={{boxShadow: 'rgba(0, 0, 0, 0.24) 0px 3px 8px'}}
+              >
+                <Link href="/">
+                  <Image
+                    src={findSettingByName('site logo')?.url || '/logo.png'}
+                    width={100}
+                    height={100}
+                    alt="logo Bắc Hà"
+                    className="w-full h-full object-cover"
+                  />
+                </Link>
+              </motion.div>
+              : null
+            }
           </AnimatePresence>
         </div>
-        
-        <AnimatePresence>
-          { start && showListScene
-            ? <motion.div 
-                ref={ref}
-                initial={{ x: -280 }}
-                animate={{ x: 0 }}
-                exit={{ x: -280 }}
-                className="flex-grow min-h-0 w-full max-w-[310px] relative text-sm md:text-base"
-              >
-                <AnimatePresence>
-                  { showGroupScene
-                    ? <motion.div
-                      initial={{ x: -280 }}
-                      animate={{ x: 0 }}
-                      exit={{ x: -280 }}
-                      className="w-full h-full flex flex-col"
-                    >
-                      <SimpleBar className="w-full max-h-full pointer-events-auto">
-                        <div className="w-[280px] flex flex-col text-white divide-y divide-black/20"
-                          onMouseLeave={() => leaveSceneTitle()}
-                        >
-                          { sceneFilter.length > 0
-                            ? sceneFilter.map(v =>
-                              <div key={v.id} className={`flex py-0.5 md:py-2 space-x-2 items-center cursor-pointer pointer-events-auto
-                                hover:text-teal-300 ${sceneSlug == v.slug ? 'text-teal-300' : ''}`}
-                                onClick={() => clickSceneTitle(v.slug)}
-                                onMouseEnter={() => enterSceneTitle(v, 'scene')}
-                              >
-                                {language === 'vn' ? 
-                                  <span className="flex-grow" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{v.name}</span>
-                                :
-                                  <span className="flex-grow" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{ v.name_en ? v.name_en : v.name}</span>
-                                }
-                                <span className="flex-none icon">
-                                  chevron_right
-                                </span>
-                              </div>
-                            )
-                            : <div className="py-0.5 md:py-2">{t('There is no context')}</div>
-                          }
-                          { scenesNonGroup.map(v =>
-                            <div key={`${v.id}-scene`} className="flex py-1 space-x-2 items-center cursor-pointer group transition-all duration-[0.4s] origin-left hover:scale-[1.1] pointer-events-auto"
-                              onMouseEnter={() => enterSceneTitle(v, 'scene')}
-                              onClick={() => clickSceneTitle(v.slug)}
-                            >
-                              <div className={`w-1 h-7 md:h-9 bg-white group-hover:bg-sky-600 ${currentScene?.groupId == v.id ? '!bg-sky-600' : ''}`}></div>
-                              {language === 'vn' ? 
-                                <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{v.name}</span>
-                              :
-                                <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{ v.name_en ? v.name_en : v.name}</span>
-                              }
-                            </div>
-                          )}
-                        </div>
-                      </SimpleBar>
-                    </motion.div>
-                    : null
-                  }
-                </AnimatePresence>
 
-                <div className={`w-full h-full absolute top-0 left-0 transition-all ease-linear flex flex-col ${showGroupScene ? '!left-[calc(100%+1rem)]' : ''}`}>
-                  <SimpleBar className="w-full max-h-full pointer-events-auto">
-                    <div ref={listScene} className="w-[280px] overflow-hidden">
-                      <div className="flex flex-col text-white"
+        <AnimatePresence>
+          {start && showListScene
+            ? <motion.div
+              ref={ref}
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              className="flex-grow min-h-0 w-full max-w-[310px] relative text-sm md:text-base"
+            >
+              <AnimatePresence>
+                {showGroupScene
+                  ? <motion.div
+                    initial={{ x: -280 }}
+                    animate={{ x: 0 }}
+                    exit={{ x: -280 }}
+                    className="w-full h-full flex flex-col"
+                  >
+                    <SimpleBar className="w-full max-h-full pointer-events-auto">
+                      <div className="w-[280px] flex flex-col text-white divide-y divide-black/20"
                         onMouseLeave={() => leaveSceneTitle()}
                       >
-                        { groups.map(v =>
-                          <div key={v.id} className="flex py-1 space-x-2 items-center cursor-pointer group transition-all duration-[0.4s] origin-left hover:scale-[1.1] pointer-events-auto"
-                            onMouseEnter={() => enterSceneTitle(v)}
-                            onClick={() => clickGroupScene(v)}
-                          >
-                            <div className={`w-1 h-7 md:h-9 bg-white group-hover:bg-sky-600 ${currentScene?.groupId == v.id ? '!bg-sky-600' : ''}`}></div>
-                            {language === 'vn' ? 
-                             <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{ v.name}</span>
-                             : 
-                             <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{ v.name_en ? v.name_en : v.name}</span>
-                             }
-                           
-                          </div>
-                        )}
-                        { scenesNonGroup.map((v,i) =>
+                        {sceneFilter.length > 0
+                          ? sceneFilter.map(v =>
+                            <div key={v.id} className={`flex py-0.5 md:py-2 space-x-2 items-center cursor-pointer pointer-events-auto
+                                hover:text-teal-300 ${sceneSlug == v.slug ? 'text-teal-300' : ''}`}
+                              onClick={() => clickSceneTitle(v.slug)}
+                              onMouseEnter={() => enterSceneTitle(v, 'scene')}
+                            >
+                              {language === 'vn' ?
+                                <span className="flex-grow" style={{ textShadow: "rgb(0, 0, 0) 1px 1px 4px" }}>{v.name}</span>
+                                :
+                                <span className="flex-grow" style={{ textShadow: "rgb(0, 0, 0) 1px 1px 4px" }}>{v.name_en ? v.name_en : v.name}</span>
+                              }
+                              <span className="flex-none icon">
+                                chevron_right
+                              </span>
+                            </div>
+                          )
+                          : <div className="py-0.5 md:py-2">{t('There is no context')}</div>
+                        }
+                        {scenesNonGroup.map(v =>
                           <div key={`${v.id}-scene`} className="flex py-1 space-x-2 items-center cursor-pointer group transition-all duration-[0.4s] origin-left hover:scale-[1.1] pointer-events-auto"
                             onMouseEnter={() => enterSceneTitle(v, 'scene')}
                             onClick={() => clickSceneTitle(v.slug)}
                           >
                             <div className={`w-1 h-7 md:h-9 bg-white group-hover:bg-sky-600 ${currentScene?.groupId == v.id ? '!bg-sky-600' : ''}`}></div>
                             {language === 'vn' ?
-                              <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{v.name}</span>
-                            :
-                              <span className="group-hover:text-teal-300" style={{textShadow: "rgb(0, 0, 0) 1px 1px 4px"}}>{ v.name_en ? v.name_en : v.name}</span>
+                              <span className="group-hover:text-teal-300" style={{ textShadow: "rgb(0, 0, 0) 1px 1px 4px" }}>{v.name}</span>
+                              :
+                              <span className="group-hover:text-teal-300" style={{ textShadow: "rgb(0, 0, 0) 1px 1px 4px" }}>{v.name_en ? v.name_en : v.name}</span>
                             }
                           </div>
                         )}
                       </div>
+                    </SimpleBar>
+                  </motion.div>
+                  : null
+                }
+              </AnimatePresence>
+
+              <div className={`w-full h-full absolute top-0 left-0 transition-all ease-linear flex flex-col ${showGroupScene ? '!left-[calc(100%+1rem)]' : ''}`}>
+                <SimpleBar className="w-full max-h-full pointer-events-auto">
+                  <div ref={listScene} className="w-[280px] overflow-hidden">
+                    <div className="flex flex-col text-white"
+                      onMouseLeave={() => leaveSceneTitle()}
+                    >
+
+                      {/* {groups.map(v =>
+                        <div key={v.id} className="flex py-1 space-x-2 items-center cursor-pointer group transition-all duration-[0.4s] origin-left hover:scale-[1.1] pointer-events-auto"
+                          onMouseEnter={() => enterSceneTitle(v)}
+                          onClick={() => clickGroupScene(v)}
+                        >
+                          <div className={`w-1 h-7 md:h-9 bg-white group-hover:bg-sky-600 ${currentScene?.groupId == v.id ? '!bg-sky-600' : ''}`}></div>
+                          {language === 'vn' ?
+                            <span className="group-hover:text-teal-300" style={{ textShadow: "rgb(0, 0, 0) 1px 1px 4px" }}>{v.name}</span>
+                            :
+                            <span className="group-hover:text-teal-300" style={{ textShadow: "rgb(0, 0, 0) 1px 1px 4px" }}>{v.name_en ? v.name_en : v.name}</span>
+                          }
+
+                        </div>
+                      )} */}
+                      <div className="tree-view">
+                        {groupedData.map(group => (
+                          <div key={group.id} className="group-item">
+                            <div className="flex py-1 space-x-2 items-center justify-between cursor-pointer group transition-all duration-[0.4s] origin-left pointer-events-auto"
+                            >
+                              <div className="flex flex-row items-center space-x-2">
+                                <div className={`w-1 h-7 md:h-9 bg-white group-hover:bg-sky-600 ${currentScene?.groupId === group.id ? '!bg-sky-600' : ''}`}></div>
+                                <span className="group-hover:text-teal-300 font-ex" style={{ textShadow: "rgb(0, 0, 0) 1px 1px 4px" }}>
+                                  {language === 'vn' ? group.name : (group.name_en ? group.name_en : group.name)}
+                                </span>
+                              </div>
+                              {group.children && group.children.length > 0 && (
+                                <button className="mr-2 text-xs cursor-pointer" onClick={() => toggleExpand(group.id)}>
+                                  {expandedGroups.includes(group.id) ? 
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="fill-white"><path d="M12 7.59 7.05 2.64 5.64 4.05 12 10.41l6.36-6.36-1.41-1.41L12 7.59zM5.64 19.95l1.41 1.41L12 16.41l4.95 4.95 1.41-1.41L12 13.59l-6.36 6.36z"></path></svg>
+                                  : 
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="fill-white"><path d="m12 19.24-4.95-4.95-1.41 1.42L12 22.07l6.36-6.36-1.41-1.42L12 19.24zM5.64 8.29l1.41 1.42L12 4.76l4.95 4.95 1.41-1.42L12 1.93 5.64 8.29z"></path></svg>
+                                  }
+                                </button>
+                              )}
+                            </div>
+                            { expandedGroups.includes(group.id) && group.children && group.children.length > 0 && (
+                              <div className="ml-6">
+                                {group.children.map((child: any) => (
+                                  <div key={child.id} className="flex py-1 space-x-2 items-center cursor-pointer group transition-all duration-[0.4s] origin-left hover:scale-[1.1] pointer-events-auto"
+                                    onMouseEnter={() => enterSceneTitle(child)}
+                                    onClick={() => clickGroupScene(child)}
+                                  >
+                                    {/* <div className="w-1 h-7 md:h-9 bg-white group-hover:bg-sky-600"></div> */}
+                                    <span className="group-hover:text-teal-300 font-extrabold" style={{ textShadow: "rgb(0, 0, 0) 1px 1px 4px" }}>
+                                      {language === 'vn' ? child.name : (child.name_en ? child.name_en : child.name)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+
+                      {scenesNonGroup.map((v, i) =>
+                        <div key={`${v.id}-scene`} className="flex py-1 space-x-2 items-center cursor-pointer group transition-all duration-[0.4s] origin-left hover:scale-[1.1] pointer-events-auto"
+                          onMouseEnter={() => enterSceneTitle(v, 'scene')}
+                          onClick={() => clickSceneTitle(v.slug)}
+                        >
+                          <div className={`w-1 h-7 md:h-9 bg-white group-hover:bg-sky-600 ${currentScene?.groupId == v.id ? '!bg-sky-600' : ''}`}></div>
+                          {language === 'vn' ?
+                            <span className="group-hover:text-teal-300" style={{ textShadow: "rgb(0, 0, 0) 1px 1px 4px" }}>{v.name}</span>
+                            :
+                            <span className="group-hover:text-teal-300" style={{ textShadow: "rgb(0, 0, 0) 1px 1px 4px" }}>{v.name_en ? v.name_en : v.name}</span>
+                          }
+                        </div>
+                      )}
                     </div>
-                  </SimpleBar>
-                </div>
-              </motion.div>
+                  </div>
+                </SimpleBar>
+              </div>
+            </motion.div>
             : null
           }
         </AnimatePresence>

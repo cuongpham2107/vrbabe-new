@@ -253,10 +253,13 @@ model AccessHistory {
 
 model GroupScene {
   id   String @id @default(uuid())
+  parent_id String? @map("parent_id")
+  
   name String
   name_en String?
   sort Int?
-
+  parent    GroupScene? @relation("children", fields: [parent_id], references: [id])
+  children  GroupScene[] @relation("children")
   scenes Scene[]
 
   publish   String   @default("publish") // or draft
